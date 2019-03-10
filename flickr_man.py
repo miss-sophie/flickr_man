@@ -360,14 +360,14 @@ def pre_routine():
         exit(1)
     # initialize FlickerApi
     global flickr
-    flickr = flickrapi.FlickrAPI(Config.get('Api', 'key'), Config.get('Api', 'secret'), token=None, format="parsed-json", store_token=False)
+    flickr = flickrapi.FlickrAPI(Config.get('Api', 'key'), Config.get('Api', 'secret'), format="parsed-json")
     return
 
 
 def post_routine():
     print('Do you want to keep the working files in ./downloads?')
     answer = input('yes/no')
-    if answer  == "no":
+    if answer == "no":
         print('Deleting files...')
         shutil.rmtree('downloads')
         return True
@@ -379,11 +379,30 @@ def post_routine():
 
 def auth():
     try:
-        token = flickr.authenticate_via_browser(perms='write')
-        logging.debug(token)
+        auth_response = flickr.auth.oauth.checkToken()
+        logging.debug(auth_response)
+        if auth_response['oauth']['perms']['_content'] == 'write':
+            print('Logged in as: ' + auth_response['oauth']['user']['fullname'])
+            return True
     except flickrapi.FlickrError as fe:
-        logging.warning(fe)
-        exit(1)
+        # Token invalid or not found, continue to auth_via_browser
+        if fe.code == 98:
+            try:
+                flickr.authenticate_via_browser(perms='write')
+                if auth():
+                    return True
+            except flickrapi.FlickrError as fe:
+                logging.warning(fe)
+                exit(1)
+        else:
+            exit(1)
+
+
+def reset_auth():
+    if os.path.isfile('~/flickr/oauth-tokens.sqlite'):
+        os.remove('~/.flickr/oauth-tokens.sqlite')
+        print('Token reset successful.')
+    return
 
 
 def config(args: dict) -> None:
@@ -400,12 +419,13 @@ def config(args: dict) -> None:
         modified = False
         if args.userid is not None:
             Config.set('User', 'id', args.userid)
+            auth()
             modified = True
         if args.username is not None:
-            userid = get_user_id_by_username(args.username)
-            # TODO None Check and workaround
-            Config.set('User', 'id', userid)
+            user_id = get_user_id_by_username(args.username)
+            Config.set('User', 'id', user_id)
             Config.set('User', 'name', args.username)
+            auth()
             modified = True
         if args.apikey is not None:
             if args.apisecret is not None:
@@ -530,6 +550,11 @@ def start():
     sort_parser = subparsers.add_parser('sort')
     sort_parser.add_argument('--all', help='Iterates through the complete account.', action="store_true")
     sort_parser.set_defaults(func=sort)
+
+    #create the parser for 'auth' command
+    auth_parser = subparsers.add_parser('auth')
+    auth_parser.add_argument('--reset', help='Deletes the flickr auth token', action='store_true')
+    auth_parser.set_defaults(func=reset_auth)
 
     args = parser.parse_args()
     args.func(args)
