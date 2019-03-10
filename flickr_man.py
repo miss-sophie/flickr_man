@@ -14,6 +14,7 @@ import shutil
 from progress.bar import IncrementalBar
 import time
 import datetime
+from shutil import which
 
 flickr = None
 Config = configparser.ConfigParser()
@@ -30,7 +31,7 @@ class ExifTool(object):
 
     sentinel = "{ready}\n"
 
-    def __init__(self, executable="/usr/bin/exiftool"):
+    def __init__(self, executable=which('exiftool')):
         self.executable = executable
 
     def __enter__(self):
@@ -336,8 +337,8 @@ def pre_routine():
     if not os.path.exists('downloads'):
         os.mkdir('downloads')
     # make sure exiftool is installed
-    if not os.path.exists('/usr/bin/exiftool'):
-        print('Cloud not find exiftool. (/usr/bin/exiftool)')
+    if not which('exiftool'):
+        print('Cloud not find exiftool.')
         exit(1)
     # load config
     if not os.path.isfile('config.ini'):
