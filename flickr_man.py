@@ -419,12 +419,14 @@ def config(args: dict) -> None:
         modified = False
         if args.userid is not None:
             Config.set('User', 'id', args.userid)
+            reset_auth()
             auth()
             modified = True
         if args.username is not None:
             user_id = get_user_id_by_username(args.username)
             Config.set('User', 'id', user_id)
             Config.set('User', 'name', args.username)
+            reset_auth()
             auth()
             modified = True
         if args.apikey is not None:
