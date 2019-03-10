@@ -419,24 +419,28 @@ def config(args: dict) -> None:
         modified = False
         if args.userid is not None:
             Config.set('User', 'id', args.userid)
+            print('Changed user-id')
             reset_auth()
             auth()
             modified = True
         if args.username is not None:
+            print('Fetching user-id')
             user_id = get_user_id_by_username(args.username)
             Config.set('User', 'id', user_id)
             Config.set('User', 'name', args.username)
+            print('Changed username and user-id')
             reset_auth()
             auth()
             modified = True
         if args.apikey is not None:
-            if args.apisecret is not None:
-                Config.set('Api', 'key', args.apikey)
-                Config.set('Api', 'key', args.apisecret)
-                modified = True
-            else:
-                print('Please provide a suitable Secret to your key')
-                exit(1)
+            Config.set('Api', 'key', args.apikey)
+            print('Changed API-Key')
+            modified = True
+        if args.apisecret is not None:
+            Config.set('Api', 'secret', args.apisecret)
+            print('Changed API-Secret')
+            modified = True
+
         if modified:
             configfile = open('config.ini', 'w')
             Config.write(configfile)
