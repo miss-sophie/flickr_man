@@ -16,8 +16,11 @@ Please make sure, you have Python 3 installed. Then execute the following comman
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
+
+### 3. Install ExifTool
+Please make sure, you have [ExifTool](https://www.sno.phy.queensu.ca/~phil/exiftool/) installed.
 
 ## Configuration
 

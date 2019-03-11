@@ -8,7 +8,6 @@ import wget
 import json
 import configparser
 from pick import pick
-from pprint import pprint as print
 from retrying import retry
 import shutil
 from progress.bar import IncrementalBar
@@ -373,7 +372,7 @@ def post_routine():
         shutil.rmtree('downloads')
         return True
     if answer == 'yes':
-        print('I don´t touch the files.')
+        print('I do not touch the files.')
         return True
     return False
 
@@ -406,7 +405,7 @@ def reset_auth():
     return
 
 
-def config(args: dict) -> None:
+def config(args: dict) -> dict:
     # View config
     if args.view:
         print("Exif-Manipulator Config:")
@@ -547,8 +546,8 @@ def start():
 
     # create the parser for 'modify' command
     modify_parser = subparsers.add_parser('modify')
-    modify_parser.add_argument('old_value', metavar='old', type=str, help='Exif value to search for')
-    modify_parser.add_argument('new_value', metavar='new', type=str, help='Replacing Exif value')
+    modify_parser.add_argument('old', metavar='old', type=str, help='Exif value to search for')
+    modify_parser.add_argument('new', metavar='new', type=str, help='Replacing Exif value')
     modify_parser.add_argument('--all', help='Iterates through the complete account.', action="store_true")
     modify_parser.add_argument('--checkonly', help='Perform run without changing the photos.', action="store_true")
     modify_parser.set_defaults(func=modify)
