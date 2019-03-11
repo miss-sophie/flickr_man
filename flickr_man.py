@@ -330,6 +330,20 @@ def process_photo(photo, old_value, new_value):
         return False
 
 
+def generate_blank_config():
+    # No config file found. Generating base file
+    configfile = open('config.ini', 'w')
+    Config.add_section('Api')
+    Config.set('Api', 'key', 'yourkey')
+    Config.set('Api', 'secret', 'yoursecret')
+    Config.add_section('User')
+    Config.set('User', 'id', 'yourid')
+    Config.set('User', 'name', 'yourname')
+    Config.write(configfile)
+    configfile.close()
+    return
+
+
 def pre_routine():
     global Config
     # make sure the download directory is in place.
@@ -341,16 +355,7 @@ def pre_routine():
         exit(1)
     # load config
     if not os.path.isfile('config.ini'):
-        # No config file found. Generating base file
-        configfile = open('config.ini', 'w')
-        Config.add_section('Api')
-        Config.set('Api', 'key', 'yourkey')
-        Config.set('Api', 'secret', 'yoursecret')
-        Config.add_section('User')
-        Config.set('User', 'id', 'yourid')
-        Config.set('User', 'name', 'yourname')
-        Config.write(configfile)
-        configfile.close()
+        generate_blank_config()
     try:
         Config.read('config.ini')
         # TODO Sanititze confige file
@@ -406,6 +411,8 @@ def reset_auth():
 
 
 def config(args: dict) -> dict:
+    if not os.path.isfile('config.ini'):
+        generate_blank_config()
     # View config
     if args.view:
         print("Exif-Manipulator Config:")
